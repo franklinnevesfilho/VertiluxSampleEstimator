@@ -1,7 +1,13 @@
 const operations =
     [
-        'Manual',
-        'Motorized',
-        'Cordless'
+        {
+            name: 'Manual',
+        },
+        {
+            name: 'Motorized',
+        },
+        {
+            name: 'Cordless',
+        }
     ]
 export default operations;

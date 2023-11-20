@@ -1,129 +1,83 @@
 import { useState, useEffect } from 'react';
-import QuestionForm from './questionForm.jsx';
 import shades from "../assets/types/shades.js";
 import operations from "../assets/types/operations.js";
-import styles from '../assets/types/styles.js';
-import styleParent from '../assets/types/StyleParent.js';
+import styles from '../assets/types/Styles.js';
+import systemStyleJunction from "../assets/types/SystemStyleJunction.js";
+import questions from "../assets/types/Questions.js";
+import ButtonTrack from "./ButtonTrack.jsx";
+import Questionnaire from "./Questionnaire.jsx";
 
 function SampleEstimator() {
-    const [sampleAnswer, setSampleAnswer] = useState({
-        shade: '',
-        operation: '',
-        styleParent: '',
-        style: '',
-        length: '',
-        width: '',
-        color: '',
-    });
+    const [currIndex, setCurrIndex] = useState(0)
+    const [answerChoices, setAnswerChoices] = useState([])
+    const [selected, setSelected] = useState('');
+    const [submittedAnswer, setSubmittedAnswer] = useState('');
 
-    const [parentStyles, setParentStyles] = useState([]);
-    const [childStyles, setChildStyles] = useState([]);
+    // Filters the objects into arrays with just the name
+    const [ questionsArray ] = useState(questions)
+    const [shadeOptions] = useState(shades.map(shade =>{ return shade.name}))
+    const [operationOptions] = useState(operations.map(operation => {return operation.name}))
+    const [styleOptions, setStyleOptions] = useState(styles.map(style =>{return style.name}))
 
-    const filterParentStyles = () => {
-        const parents = styleParent.filter(
-            (parentStyle) =>
-                parentStyle.system.shade === sampleAnswer.shade && parentStyle.system.operation === sampleAnswer.operation
-
-            );
-        setParentStyles(parents);
-    };
-
-    const filterStyles = () => {
-        const style = styles.filter((style) => style.parent === sampleAnswer.styleParent);
-        setChildStyles(style);
-    };
-
-    const setAnswer = (type, value) => {
-        setSampleAnswer((prevSampleAnswer) => ({
-            ...prevSampleAnswer,
-            [type]: value,
-        }));
-
-    };
-
-    const [currIndex, setCurrIndex] = useState(0);
-
-    const goBack = () => {
-        if (currIndex > 0) {
-            setCurrIndex(currIndex - 1);
+    // Filters the different styles so that it is appropriate for the system selected
+    const calculateStyleOptions = () =>{
+        let filteredStyle = [];
+        for(let i = 0; i < systemStyleJunction.length; i++){
+            // Searches for the junction with the specifications
+            if(systemStyleJunction[i].system === submittedAnswer){
+                let styleArr = systemStyleJunction[i].style
+                for(let i = 0; i < styleArr.length; i++){
+                    // Adds the name of every
+                    filteredStyle.push(styles[styleArr[i]])
+                }
+            }
         }
-    };
+        //updates the styles
+        setStyleOptions(filteredStyle)
+    }
 
-    const submitAnswer = () => {
-        if (currIndex < questionnaire.length - 1) {
-            setCurrIndex(currIndex + 1);
-        }
-        filterParentStyles()
-        filterStyles()
-    };
-
+    // Updates the answer choices based on the question/index
     useEffect(() => {
-        setParentStyles(
-            styleParent.filter(
-            (parentStyle) =>
-                parentStyle.system.shade === sampleAnswer.shade || parentStyle.system.operation === sampleAnswer.operation
-        ))
+        switch(currIndex){
+            case 0:
+                setAnswerChoices(shadeOptions)
+                break;
+            case 1:
+                setAnswerChoices(operationOptions)
+                break;
+            case 2:
+                //TODO:
+                // filter the styles depending on the system chosen
 
-        setChildStyles(
-            styles.filter((style) => style.parent === sampleAnswer.styleParent)
-        )
-    }, [sampleAnswer.shade, sampleAnswer.operation, sampleAnswer.styleParent]);
-
-    let questionnaire = [
-        {
-            type:'shade',
-            question:'What type of shade would you like?',
-            answer: shades
-        },
-        {
-            type:'operation',
-            question: 'How will you operate your shade?',
-            answer: operations
-        },
-        {
-            type: 'style',
-            question: 'Which style would you like?',
-            answer: parentStyles
-        },
-        {
-            type: 'style-variation',
-            question: 'Which variation of this style would you like?',
-            answer: childStyles
-        },
-        {
-            type:'length',
-            question: 'What is the length of your shade?',
-            answer:[]
-        },
-        {
-            type:'width',
-            question: 'What is the width of your shade?',
-            answer:[]
-        },
-        {
-            type: 'color',
-            question: 'What color would you like your system to be?',
-            answer:
-                [
-                    'Satin Anodized',
-                    'Ivory',
-                    'White',
-                    'Black',
-                    'Bronze'
-                ]
+                calculateStyleOptions()
+                // If no answer choices skip a question
+                if(styleOptions.length === 0){
+                    setCurrIndex(currIndex + 2)
+                }else{
+                    setAnswerChoices(styleOptions.map(style =>{ return style.name}))
+                }
+                break;
+            case 3:
+                break;
+            default:
+                setAnswerChoices([])
         }
-    ]
-
+    }, [currIndex, operationOptions, shadeOptions, styleOptions]);
     return (
         <>
-            <QuestionForm
-                setAnswer={setAnswer}
-                questionnaire={questionnaire[currIndex]}
+            <Questionnaire
+                question={questionsArray[currIndex].question}
+                answerChoices={answerChoices}
+                setSelected={setSelected}/>
+            <h5>Currently selected : {submittedAnswer}</h5>
+            <ButtonTrack
+                index={currIndex}
+                setIndex={setCurrIndex}
+                maxIndex={questionsArray.length}
+                setAnswer={setSubmittedAnswer}
+                answer={submittedAnswer}
+                selected={selected}
             />
-            <div className={'direction-button'}>
-                <button onClick={goBack}>&lt;- Back</button>
-                <button onClick={submitAnswer}>Next -&gt;</button>
-            </div>
         </>
     );
 }

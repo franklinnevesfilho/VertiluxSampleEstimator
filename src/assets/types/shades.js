@@ -1,6 +1,10 @@
 const shades =
     [
-        'Roller',
-        'Neolux'
+        {
+            name: 'Roller',
+        },
+        {
+            name: 'Neolux',
+        }
     ]
 export default shades;
