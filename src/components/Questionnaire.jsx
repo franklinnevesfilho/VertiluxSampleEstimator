@@ -14,9 +14,18 @@ function Questionnaire({question, answerChoices, setSelected}) {
         if(answerChoices.length === 0){
             return <label><input className={'number-input'} type="number" onChange={handleInput}/> in</label>
         }else{
-            return <div>
+            return <div className={'answer-choices'}>
                         {answerChoices.map((answer, index) =>(
-                            <label key={index}><input checked={currSelected === answer} name={'option'} type="radio" value={answer} onChange={handleInput}/> {answer}</label>
+                            <label
+                                key={index}
+                                className={'radio-container'}>
+                                <input
+                                    checked={currSelected === answer}
+                                    name={'option'}
+                                    type="radio"
+                                    value={answer}
+                                    onChange={handleInput}/><span className={'checkmark'}></span> {answer}</label>
+
                         ))}
                     </div>
         }
