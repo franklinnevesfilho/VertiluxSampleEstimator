@@ -8,18 +8,19 @@ import ButtonTrack from "./ButtonTrack.jsx";
 import Questionnaire from "./Questionnaire.jsx";
 
 function SampleEstimator() {
+    // DB File manipulation
+    const [ questionsArray ] = useState(questions)
+    const [shadeOptions] = useState(shades.map(shade =>{ return shade.name}))
+    const [operationOptions] = useState(operations.map(operation => {return operation.name}))
+
+    // Variables used throughout application
     const [currIndex, setCurrIndex] = useState(0)
     const [answerChoices, setAnswerChoices] = useState([])
     const [selected, setSelected] = useState('');
     const [submittedAnswer, setSubmittedAnswer] = useState('');
     const [filteredStyles, setFilteredStyles] = useState([])
 
-    // Filters the objects into arrays with just the name
-    const [ questionsArray ] = useState(questions)
-    const [shadeOptions] = useState(shades.map(shade =>{ return shade.name}))
-    const [operationOptions] = useState(operations.map(operation => {return operation.name}))
-
-    // Restart button
+    // Restart all values
     const restart = () =>{
         if(currIndex !== 0){
             setCurrIndex(0)
@@ -27,7 +28,8 @@ function SampleEstimator() {
             setFilteredStyles([])
         }
     }
-    // Next question
+
+    // Save Answer and navigate to next question
     const next = () => {
         if(currIndex < questionsArray.length - 1 ){
             setCurrIndex(currIndex+1)
@@ -42,8 +44,8 @@ function SampleEstimator() {
     // Updates the answer choices based on the question/index
     useEffect(() => {
         // Skip a question
-        const skip = () =>{
-            setCurrIndex(currIndex + 1)
+        const skip = (skipCount) =>{
+            setCurrIndex(currIndex + skipCount)
         }
 
         switch(currIndex){
@@ -68,10 +70,8 @@ function SampleEstimator() {
 
                 // If no answer choices skip a question
                 if (filteredStyles.length === 0) {
-                    //Skip style question
-                    skip()
-                    //Skip style variation question
-                    skip()
+                    //Skip style & variation question
+                    skip(2)
                 } else {
 
                     setAnswerChoices(filteredStyles.map(style => {
@@ -96,7 +96,7 @@ function SampleEstimator() {
                 })
                 if(variations.length === 0){
                     // Skip variation questions
-                    skip()
+                    skip(1)
                 }else{
                     setAnswerChoices(variations)
                 }
